@@ -11,8 +11,10 @@ class MyPaint extends CustomPainter {
     @required this.lines,
   }) {
     _paint = Paint()
+      ..color=Colors.red
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
+
   }
 
   @override

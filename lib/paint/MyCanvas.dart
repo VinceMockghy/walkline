@@ -12,14 +12,27 @@ class Mycanvas extends StatefulWidget {
 class _MycanvasState extends State<Mycanvas> {
   var _positions = <CircleInLine>[];
   var _lines = <List<CircleInLine>>[];
+  var setlist = <Offset>[];
   Offset _oldPos; //记录上一点
 
-
   @override
-  Widget build(BuildContext context){
-
+  Widget build(BuildContext context) {
     var body = CustomPaint(
+      size: Size(300, 300),
       painter: MyPaint(lines: _lines),
+//      child: RepaintBoundary(
+//        child: new RaisedButton(
+//          onPressed: () {
+//            _lines.clear();
+//            _render();
+//          },
+//          color: Colors.blue[400],
+//          child: new Text(
+//            "clean",
+//            style: new TextStyle(color: Colors.white),
+//          ),
+//        ),
+//      ),
     );
 
     var scaffold = Scaffold(
@@ -30,19 +43,15 @@ class _MycanvasState extends State<Mycanvas> {
       child: scaffold,
       onPanDown: _pandown,
       onPanEnd: _panend,
-      onPanUpdate:_panupdate,
-      onDoubleTap: (){
-        _lines.clear();
-        _render();
-      },
+      onPanUpdate: _panupdate,
+//      onDoubleTap: () {
+//        _lines.clear();
+//        _render();
+//      },
     );
 
     return result;
   }
-
-
-
-
 
   void _pandown(DragDownDetails details) {
     print(details.toString());
@@ -52,34 +61,86 @@ class _MycanvasState extends State<Mycanvas> {
     _oldPos = Offset(x, y);
   }
 
-  void _render(){
-    setState(() {
-
-    });
+  void _render() {
+    setState(() {});
   }
 
-  void _panupdate(DragUpdateDetails details){
+  void _panupdate(DragUpdateDetails details) {
     var x = details.globalPosition.dx;
     var y = details.globalPosition.dy;
     var currentPos = Offset(x, y);
-    if((currentPos-_oldPos).distance>3){
-      var lenth = (currentPos-_oldPos).distance;
-      var width = 40*pow(lenth,-1.2);
-      var circle = CircleInLine(Colors.red,currentPos,radius: width);
+    if ((currentPos - _oldPos).distance > 3) {
+      var lenth = (currentPos - _oldPos).distance;
+//      var width = 40 * pow(lenth, -1.2);
+      var circle = CircleInLine(Colors.blue, currentPos, radius: 4);
       _positions.add(circle);
-      _oldPos=currentPos;
+      _oldPos = currentPos;
+
+      setlist.add(currentPos);
       _render();
     }
   }
 
-
-  void _panend(DragEndDetails details){
+  void _panend(DragEndDetails details) {
     var oldline = <CircleInLine>[];
-    for(int i=0;i<_positions.length;i++){
+    for (int i = 0; i < _positions.length; i++) {
       oldline.add(_positions[i]);
     }
     _lines.add(oldline);
     _positions.clear();
-    print(_lines.toString());
+
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(" "),
+              content: Text("是否发送"),
+              contentTextStyle: TextStyle(color: Colors.green),
+              backgroundColor: Colors.white,
+              elevation: 8.0,
+              semanticLabel: 'Label',
+              // 这个用于无障碍下弹出 dialog 的提示
+//              shape: Border.all(),
+              // dialog 的操作按钮，actions 的个数尽量控制不要过多，否则会溢出 `Overflow`
+              actions: <Widget>[
+                // 点击增加显示的值
+                FlatButton(
+                    onPressed: () {
+                      print("确认成功");
+                      sendpath();
+                      Navigator.pop(context);
+                      _lines.clear();
+                      _render();
+                    },
+                    child: Text('确认')),
+                // 点击减少显示的值
+                FlatButton(
+                    onPressed: () {
+                      print("取消成功");
+                      Navigator.pop(context);
+                      _lines.clear();
+                      _render();
+                    },
+                    child: Text('取消')),
+              ],
+            ));
+  }
+
+  void sendpath() {
+    for (int i = 1; i < setlist.length; i++) {
+      var k = (setlist[i - 1].dy - setlist[i].dy) *
+          1.0 /
+          (setlist[i].dx - setlist[i - 1].dx);
+      k = atan(k) * 180 / pi;
+      if (setlist[i].dx > setlist[i - 1].dx) {
+        if (k < 0) k = 360 + k;
+      } else {
+        if (k < 0)
+          k = 180 + k;
+        else
+          k = 180 + k;
+      }
+      print(k);
+    }
+    setlist.clear();
   }
 }
