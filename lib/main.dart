@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:walkline/paint/MyCanvas.dart';
+import 'package:walkline/unlock/gesture_create_state.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,8 +13,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Mycanvas(),
+//      home: Mycanvas(),
+      home: GestureCreat(),
     );
   }
 }
+
+
+
 

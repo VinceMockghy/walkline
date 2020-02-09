@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:walkline/action.dart';
 import 'dart:math';
 
 import 'package:walkline/paint/CircleInLine.dart';
@@ -139,7 +140,9 @@ class _MycanvasState extends State<Mycanvas> {
         else
           k = 180 + k;
       }
-      print(k);
+//      print(k);
+      Action item = new Action(0, 20, k.toInt(), 0, 0, 0);
+      print(item);
     }
     setlist.clear();
   }
