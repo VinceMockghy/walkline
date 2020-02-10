@@ -21,6 +21,36 @@ class _MycanvasState extends State<Mycanvas> {
     var body = CustomPaint(
       size: Size(300, 300),
       painter: MyPaint(lines: _lines),
+
+
+//  var body = Center(
+//    child: Container(
+//      padding: EdgeInsets.all(10.0),
+//      color: Colors.amberAccent,
+//      child: Container(
+//        child: SizedBox(
+//          height: 500,
+//          width: 500,
+//          child: CustomPaint(
+//            size: Size(500,500),
+//            painter: MyPaint(lines: _lines),
+//          ),
+//        ),
+//      ),
+//
+//    ),
+
+
+//      var body = Center(
+//
+//        child: SizedBox(
+//
+//          height: 500,
+//          width: 500,
+//        ),
+
+
+
 //      child: RepaintBoundary(
 //        child: new RaisedButton(
 //          onPressed: () {
@@ -37,6 +67,9 @@ class _MycanvasState extends State<Mycanvas> {
     );
 
     var scaffold = Scaffold(
+//      appBar: AppBar(
+//        title: Text("画图控制"),
+//      ),
       body: body,
     );
 
@@ -71,7 +104,7 @@ class _MycanvasState extends State<Mycanvas> {
     var y = details.globalPosition.dy;
     var currentPos = Offset(x, y);
     if ((currentPos - _oldPos).distance > 3) {
-      var lenth = (currentPos - _oldPos).distance;
+//      var lenth = (currentPos - _oldPos).distance;
 //      var width = 40 * pow(lenth, -1.2);
       var circle = CircleInLine(Colors.blue, currentPos, radius: 4);
       _positions.add(circle);
@@ -110,6 +143,7 @@ class _MycanvasState extends State<Mycanvas> {
                       sendpath();
                       Navigator.pop(context);
                       _lines.clear();
+                      setlist.clear();
                       _render();
                     },
                     child: Text('确认')),
@@ -119,6 +153,7 @@ class _MycanvasState extends State<Mycanvas> {
                       print("取消成功");
                       Navigator.pop(context);
                       _lines.clear();
+                      setlist.clear();
                       _render();
                     },
                     child: Text('取消')),
@@ -144,6 +179,5 @@ class _MycanvasState extends State<Mycanvas> {
       Action item = new Action(0, 20, k.toInt(), 0, 0, 0);
       print(item);
     }
-    setlist.clear();
   }
 }

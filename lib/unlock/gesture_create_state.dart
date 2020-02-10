@@ -10,7 +10,7 @@ class GestureCreat extends StatefulWidget {
 }
 
 class GestureCreatState extends State<GestureCreat> {
-  var _status = GestureCreateStatus.Verify;
+//  var _status = GestureCreateStatus.Verify;
 
   LockPattern _lockPattern;
 
@@ -24,7 +24,7 @@ class GestureCreatState extends State<GestureCreat> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: Text("控制"),
+        title: Text("解锁器控制"),
       ),
       body: (
           Center(
