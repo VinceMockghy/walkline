@@ -1,11 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:walkline/action.dart';
 
 typedef GestureTapCallback = void Function();
 
@@ -28,10 +25,10 @@ class LockPattern extends StatefulWidget {
   final Color defaultColor;
 
   ///验证失败颜色
-  final Color failedColor;
+//  final Color failedColor;
 
   ///无法使用颜色
-  final Color disableColor;
+//  final Color disableColor;
 
   ///线长度
   final double lineWidth;
@@ -58,12 +55,12 @@ class LockPattern extends StatefulWidget {
       this.roundSpace,
       this.roundSpaceRatio = 0.6,
       this.defaultColor = Colors.blue,
-      this.failedColor = Colors.red,
-      this.disableColor = Colors.grey,
+//      this.failedColor = Colors.red,
+//      this.disableColor = Colors.grey,
       this.lineWidth = 2,
       this.solidRadiusRatio = 0.4,
       this.touchRadiusRatio = 0.6,
-      this.delayTime = 1,
+      this.delayTime = 500,
       this.onCompleted});
 
   @override
@@ -75,13 +72,13 @@ class LockPattern extends StatefulWidget {
     _state.updateStatus();
   }
 
-  static String selectedToString(List<int> rounds) {
-    var sb = StringBuffer();
-    for (int i = 0; i < rounds.length; i++) {
-      sb.write(rounds[i] + 1);
-    }
-    return sb.toString();
-  }
+//  static String selectedToString(List<int> rounds) {
+//    var sb = StringBuffer();
+//    for (int i = 0; i < rounds.length; i++) {
+//      sb.write(rounds[i] + 1);
+//    }
+//    return sb.toString();
+//  }
 }
 
 class _LockPatternState extends State<LockPattern> {
@@ -110,6 +107,7 @@ class _LockPatternState extends State<LockPattern> {
     print(1);
     WidgetsBinding.instance.addPostFrameCallback(_init);
   }
+
   ///可删？
   @override
   void didUpdateWidget(StatefulWidget oldWidget) {
@@ -139,9 +137,10 @@ class _LockPatternState extends State<LockPattern> {
             _radius,
             _solidRadius,
             widget.lineWidth,
-            widget.defaultColor,
-            widget.failedColor,
-            widget.disableColor));
+            widget.defaultColor
+//            widget.failedColor,
+//            widget.disableColor
+        ));
     var enableTouch = _status == LockPatternStatus.Default;
 
     return GestureDetector(
@@ -152,28 +151,77 @@ class _LockPatternState extends State<LockPattern> {
   }
 
   void updateStatus() {
+    if (_selected.length != 0) {
+      print(1);
+      _timer = Timer(Duration(milliseconds: widget.delayTime), () {
+//      print(2);
 
-    print(1);
-    _timer = Timer(Duration(milliseconds: widget.delayTime), () {
-      print(2);
-      for (Round round in _rounds) {
-        round.status = LockPatternStatus.Default;
-      }
-      print(4);
-      _selected.clear();
-      setState(() {});
-
-      print(_selected);
-    });
-    print(3);
-
+        print(4);
+        showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+                  title: Text(" "),
+                  content: Text("是否发送"),
+                  contentTextStyle:
+                      TextStyle(color: Colors.green, fontSize: 20.0),
+                  backgroundColor: Colors.white,
+                  elevation: 8.0,
+                  semanticLabel: 'Label',
+                  // 这个用于无障碍下弹出 dialog 的提示
+//              shape: Border.all(),
+                  // dialog 的操作按钮，actions 的个数尽量控制不要过多，否则会溢出 `Overflow`
+                  actions: <Widget>[
+                    // 点击增加显示的值
+                    FlatButton(
+                        onPressed: () {
+                          print("确认成功");
+                          sendpath();
+                          Navigator.pop(context);
+                          clear();
+                        },
+                        child: Text('确认')),
+                    // 点击减少显示的值
+                    FlatButton(
+                        onPressed: () {
+                          print("取消成功");
+                          Navigator.pop(context);
+                          clear();
+                        },
+                        child: Text('取消')),
+                  ],
+                ));
+      });
+      print(3);
+    }
   }
 
-//  _updateRoundStatus(LockPatternStatus status) {
-//    for (Round round in _rounds) {
-//      round.status = status;
-//    }
-//  }
+  void sendpath() {
+    print(_selected);
+    print(_selected.length);
+
+    for (int i = 1; i < _selected.length; i++) {
+      var k = (_rounds[_selected[i - 1]].y - _rounds[_selected[i]].y) *
+          1.0 /
+          (_rounds[_selected[i]].x - _rounds[_selected[i - 1]].x);
+      k = atan(k) * 180 / pi;
+      if (_rounds[_selected[i]].x >= _rounds[_selected[i - 1]].x) {
+        if (k < 0) k = 360 + k;
+      } else {
+        k = 180 + k;
+      }
+//      print(k);
+      Action item = new Action(0, 20, k.toInt(), 0, 0, 0);
+      print(item);
+    }
+  }
+
+  void clear() {
+    for (Round round in _rounds) {
+      round.status = LockPatternStatus.Default;
+    }
+    _selected.clear();
+    setState(() {});
+  }
 
   _init(_) {
     _box = context.findRenderObject() as RenderBox;
@@ -272,8 +320,8 @@ class LockPatternPainter extends CustomPainter {
   double _solidRadius;
   double _lineWidth;
   Color _defaultColor;
-  Color _failedColor;
-  Color _disableColor;
+//  Color _failedColor;
+//  Color _disableColor;
 
   LockPatternPainter(
       this._type,
@@ -284,9 +332,10 @@ class LockPatternPainter extends CustomPainter {
       this._radius,
       this._solidRadius,
       this._lineWidth,
-      this._defaultColor,
-      this._failedColor,
-      this._disableColor);
+      this._defaultColor
+//      this._failedColor,
+//      this._disableColor
+      );
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -325,29 +374,13 @@ class LockPatternPainter extends CustomPainter {
             canvas.drawCircle(round.toOffset(), _radius, paint);
             break;
           }
-        case LockPatternStatus.Failed:
-          {
-            paint.style = PaintingStyle.fill;
-            paint.color = _failedColor;
-            canvas.drawCircle(round.toOffset(), _solidRadius, paint);
-            paint.style = PaintingStyle.stroke;
-            canvas.drawCircle(round.toOffset(), _radius, paint);
-            break;
-          }
-        case LockPatternStatus.Disable:
-          {
-            paint.color = _disableColor;
-            canvas.drawCircle(round.toOffset(), _solidRadius, paint);
-            break;
-          }
       }
     }
   }
 
   _paintLineWithHollow(Canvas canvas, Paint paint) {
     if (_selected.isNotEmpty) {
-      paint.color =
-          _status == LockPatternStatus.Failed ? _failedColor : _defaultColor;
+      paint.color = _defaultColor;
       paint.style = PaintingStyle.stroke;
       paint.strokeWidth = _lineWidth;
       var path = Path();
@@ -402,20 +435,6 @@ class LockPatternPainter extends CustomPainter {
             canvas.drawCircle(round.toOffset(), _radius, paint);
             break;
           }
-        case LockPatternStatus.Failed:
-          {
-            paint.color = _failedColor;
-            canvas.drawCircle(round.toOffset(), _solidRadius, paint);
-            paint.color = _failedColor.withAlpha(20);
-            canvas.drawCircle(round.toOffset(), _radius, paint);
-            break;
-          }
-        case LockPatternStatus.Disable:
-          {
-            paint.color = _disableColor;
-            canvas.drawCircle(round.toOffset(), _solidRadius, paint);
-            break;
-          }
       }
     }
   }
@@ -423,7 +442,7 @@ class LockPatternPainter extends CustomPainter {
   _paintLine(Canvas canvas, Paint paint) {
     if (_selected.isNotEmpty) {
       paint.color =
-          _status == LockPatternStatus.Failed ? _failedColor : _defaultColor;
+           _defaultColor;
       paint.style = PaintingStyle.stroke;
       paint.strokeWidth = _lineWidth;
       var path = Path();
@@ -450,7 +469,7 @@ class LockPatternPainter extends CustomPainter {
 
 enum LockPatternType { Solid, Hollow }
 
-enum LockPatternStatus { Default, Success, Failed, Disable }
+enum LockPatternStatus { Default, Success }
 
 class Round {
   double x;

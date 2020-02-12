@@ -167,12 +167,9 @@ class _MycanvasState extends State<Mycanvas> {
           1.0 /
           (setlist[i].dx - setlist[i - 1].dx);
       k = atan(k) * 180 / pi;
-      if (setlist[i].dx > setlist[i - 1].dx) {
+      if (setlist[i].dx >= setlist[i - 1].dx) {
         if (k < 0) k = 360 + k;
       } else {
-        if (k < 0)
-          k = 180 + k;
-        else
           k = 180 + k;
       }
 //      print(k);
