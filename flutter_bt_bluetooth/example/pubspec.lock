@@ -44,7 +44,7 @@ packages:
   flutter_bt_bluetooth:
     dependency: "direct dev"
     description:
-      path: flutter_bt_bluetooth
+      path: ".."
       relative: true
     source: path
     version: "0.0.1"
