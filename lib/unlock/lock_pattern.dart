@@ -24,12 +24,6 @@ class LockPattern extends StatefulWidget {
   ///默认颜色
   final Color defaultColor;
 
-  ///验证失败颜色
-//  final Color failedColor;
-
-  ///无法使用颜色
-//  final Color disableColor;
-
   ///线长度
   final double lineWidth;
 
@@ -55,8 +49,6 @@ class LockPattern extends StatefulWidget {
       this.roundSpace,
       this.roundSpaceRatio = 0.6,
       this.defaultColor = Colors.blue,
-//      this.failedColor = Colors.red,
-//      this.disableColor = Colors.grey,
       this.lineWidth = 2,
       this.solidRadiusRatio = 0.4,
       this.touchRadiusRatio = 0.6,
@@ -71,14 +63,6 @@ class LockPattern extends StatefulWidget {
   void updateStatus() {
     _state.updateStatus();
   }
-
-//  static String selectedToString(List<int> rounds) {
-//    var sb = StringBuffer();
-//    for (int i = 0; i < rounds.length; i++) {
-//      sb.write(rounds[i] + 1);
-//    }
-//    return sb.toString();
-//  }
 }
 
 class _LockPatternState extends State<LockPattern> {
@@ -108,13 +92,13 @@ class _LockPatternState extends State<LockPattern> {
     WidgetsBinding.instance.addPostFrameCallback(_init);
   }
 
-  ///可删？
-  @override
-  void didUpdateWidget(StatefulWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    print(000);
-    WidgetsBinding.instance.addPostFrameCallback(_init);
-  }
+//  ///可删？
+//  @override
+//  void didUpdateWidget(StatefulWidget oldWidget) {
+//    super.didUpdateWidget(oldWidget);
+//    print(000);
+//    WidgetsBinding.instance.addPostFrameCallback(_init_custom);
+//  }
 
   @override
   void deactivate() {
@@ -137,10 +121,7 @@ class _LockPatternState extends State<LockPattern> {
             _radius,
             _solidRadius,
             widget.lineWidth,
-            widget.defaultColor
-//            widget.failedColor,
-//            widget.disableColor
-        ));
+            widget.defaultColor));
     var enableTouch = _status == LockPatternStatus.Default;
 
     return GestureDetector(
@@ -253,6 +234,36 @@ class _LockPatternState extends State<LockPattern> {
     setState(() {});
   }
 
+  _init_custom(_) {
+
+    _box = context.findRenderObject() as RenderBox;
+    var size = context.size;
+    if (size.width > size.height) {
+      throw Exception("LockPattern width must <= height");
+    }
+
+    var width = size.width;
+    var roundSpace = widget.roundSpace;
+    if (roundSpace != null) {
+      _radius = (width - widget.padding * 2 - roundSpace * 2) / 3 / 2;
+    } else {
+      _radius =
+          (width - widget.padding * 2) / (3 + widget.roundSpaceRatio * 2) / 2;
+      roundSpace = _radius * 2 * widget.roundSpaceRatio;
+    }
+    _solidRadius = _radius * widget.solidRadiusRatio;
+    _touchRadius = _radius * widget.touchRadiusRatio;
+
+    {
+      _rounds = List<Round>(4);
+      _rounds[0] = Round(5, 5, LockPatternStatus.Default);
+      _rounds[1] = Round(50, 50, LockPatternStatus.Default);
+      _rounds[2] = Round(150, 150, LockPatternStatus.Default);
+      _rounds[3] = Round(250, 250, LockPatternStatus.Default);
+    }
+    setState(() {});
+  }
+
   //<editor-fold desc="触摸手势调用">
   _onPanStart(DragStartDetails detail) {
     setState(() {
@@ -320,8 +331,7 @@ class LockPatternPainter extends CustomPainter {
   double _solidRadius;
   double _lineWidth;
   Color _defaultColor;
-//  Color _failedColor;
-//  Color _disableColor;
+
 
   LockPatternPainter(
       this._type,
@@ -333,8 +343,7 @@ class LockPatternPainter extends CustomPainter {
       this._solidRadius,
       this._lineWidth,
       this._defaultColor
-//      this._failedColor,
-//      this._disableColor
+
       );
 
   @override
@@ -441,8 +450,7 @@ class LockPatternPainter extends CustomPainter {
 
   _paintLine(Canvas canvas, Paint paint) {
     if (_selected.isNotEmpty) {
-      paint.color =
-           _defaultColor;
+      paint.color = _defaultColor;
       paint.style = PaintingStyle.stroke;
       paint.strokeWidth = _lineWidth;
       var path = Path();
@@ -472,6 +480,7 @@ enum LockPatternType { Solid, Hollow }
 enum LockPatternStatus { Default, Success }
 
 class Round {
+
   double x;
   double y;
   LockPatternStatus status;

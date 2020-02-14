@@ -29,8 +29,8 @@ class GestureCreatState extends State<GestureCreat> {
       body: (
           Center(
             child: SizedBox(
-              width: 500,
-              height: 500,
+              width: 300,
+              height: 300,
               child: _lockPattern,
             ),
           )
