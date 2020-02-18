@@ -10,8 +10,6 @@ class GestureCreat extends StatefulWidget {
 }
 
 class GestureCreatState extends State<GestureCreat> {
-//  var _status = GestureCreateStatus.Verify;
-
   LockPattern _lockPattern;
 
   @override
@@ -26,20 +24,17 @@ class GestureCreatState extends State<GestureCreat> {
       appBar: AppBar(
         title: Text("解锁器控制"),
       ),
-      body: (
-          Center(
-            child: SizedBox(
-              width: 300,
-              height: 300,
-              child: _lockPattern,
-            ),
-          )
-      ),
+      body: (Center(
+        child: SizedBox(
+          width: 300,
+          height: 300,
+          child: _lockPattern,
+        ),
+      )),
     );
   }
 
-
-  _gestureComplete(List<int> selected, LockPatternStatus status) {
+  _gestureComplete(List<int> selected) {
     setState(() {
       _lockPattern.updateStatus();
 //      print(_status);
@@ -48,7 +43,7 @@ class GestureCreatState extends State<GestureCreat> {
   }
 }
 
-enum GestureCreateStatus{
+enum GestureCreateStatus {
   Create,
   Create_Failed,
   Verify,
