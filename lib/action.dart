@@ -5,8 +5,9 @@ class Action {
   int d;
   int r;
   int a;
+  int len;
 
-  Action(this.o, this.v, this.c, this.d, this.r, this.a);
+  Action(this.o, this.v, this.c, this.d, this.r, this.a,this.len);
 
   @override
   String toString() {

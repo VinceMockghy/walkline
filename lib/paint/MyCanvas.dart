@@ -162,6 +162,7 @@ class _MycanvasState extends State<Mycanvas> {
   }
 
   void sendpath() {
+    int length=0;
     for (int i = 1; i < setlist.length; i++) {
       var k = (setlist[i - 1].dy - setlist[i].dy) *
           1.0 /
@@ -172,8 +173,12 @@ class _MycanvasState extends State<Mycanvas> {
       } else {
           k = 180 + k;
       }
+      length = 20*sqrt(
+          pow(setlist[i].dy -setlist[i - 1].dy, 2) +
+              pow(setlist[i].dx - setlist[i - 1].dx, 2))
+          .toInt();
 //      print(k);
-      Action item = new Action(0, 20, k.toInt(), 0, 0, 0);
+      Action item = new Action(0, 20, k.toInt(), 0, 0, 0,length);
       print(item);
     }
   }

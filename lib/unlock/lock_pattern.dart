@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:walkline/action.dart';
+import 'package:flutter_bt_bluetooth/flutter_bt_bluetooth.dart';
 
 typedef GestureTapCallback = void Function();
 
@@ -31,10 +32,13 @@ class LockPattern extends StatefulWidget {
   ///回调
   final Function(List<int>) onCompleted;
 
+  final BlueViewController controller;
+
   final _LockPatternState _state = _LockPatternState();
 
   LockPattern(
-      {this.padding = 10,
+      {@required this.controller,
+      this.padding = 10,
       this.roundSpaceRatio = 0.6,
       this.defaultColor = Colors.blue,
       this.lineWidth = 2,
@@ -48,12 +52,6 @@ class LockPattern extends StatefulWidget {
     return _state;
   }
 
-//  @override
-//  State<StatefulWidget> createState() {
-//    // TODO: implement createState
-//    return null;
-//  }
-
   void updateStatus() {
     _state.updateStatus();
   }
@@ -61,6 +59,9 @@ class LockPattern extends StatefulWidget {
 
 class _LockPatternState extends State<LockPattern> {
   RenderBox _box;
+
+  ///发送数据
+  List<Action> _actions = [];
 
   ///九宫格圆
   List<Round> _rounds = List<Round>(9);
@@ -93,14 +94,8 @@ class _LockPatternState extends State<LockPattern> {
   Widget build(BuildContext context) {
     var custom = CustomPaint(
         size: Size.infinite,
-        painter: LockPatternPainter(
-            _rounds,
-            _selected,
-            _lastTouchPoint,
-            _radius,
-            _solidRadius,
-            widget.lineWidth,
-            widget.defaultColor));
+        painter: LockPatternPainter(_rounds, _selected, _lastTouchPoint,
+            _radius, _solidRadius, widget.lineWidth, widget.defaultColor));
 
     return GestureDetector(
         child: custom,
@@ -114,10 +109,11 @@ class _LockPatternState extends State<LockPattern> {
       print(1);
       _timer = Timer(Duration(milliseconds: widget.delayTime), () {
 //      print(2);
-
+        int time = 0;
         print(4);
         showDialog(
             context: context,
+            barrierDismissible: false,
             builder: (context) => AlertDialog(
                   title: Text(" "),
                   content: Text("是否发送"),
@@ -126,20 +122,39 @@ class _LockPatternState extends State<LockPattern> {
                   backgroundColor: Colors.white,
                   elevation: 8.0,
                   semanticLabel: 'Label',
-                  // 这个用于无障碍下弹出 dialog 的提示
-//              shape: Border.all(),
-                  // dialog 的操作按钮，actions 的个数尽量控制不要过多，否则会溢出 `Overflow`
                   actions: <Widget>[
-                    // 点击增加显示的值
                     FlatButton(
                         onPressed: () {
                           print("确认成功");
-                          sendpath();
-                          Navigator.pop(context);
-                          clear();
+                          getpath();
+                          time = sendpath();
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false, //点击遮罩不关闭对话框
+                            builder: (context) {
+                              return AlertDialog(
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    CircularProgressIndicator(),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 26.0),
+                                      child: Text("正在发送，请稍后..."),
+                                    )
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                          Timer.periodic(Duration(milliseconds: time), (timer) {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                            clear();
+                            timer.cancel();
+                            timer = null;
+                          });
                         },
                         child: Text('确认')),
-                    // 点击减少显示的值
                     FlatButton(
                         onPressed: () {
                           print("取消成功");
@@ -154,24 +169,49 @@ class _LockPatternState extends State<LockPattern> {
     }
   }
 
-  void sendpath() {
-    print(_selected);
-    print(_selected.length);
-
+  void getpath() {
+    int length = 0;
+    int base = 20;
     for (int i = 1; i < _selected.length; i++) {
-      var k = (_rounds[_selected[i - 1]].y - _rounds[_selected[i]].y) *
+      var k = (_rounds[_selected[i]].x - _rounds[_selected[i - 1]].x).abs() *
           1.0 /
-          (_rounds[_selected[i]].x - _rounds[_selected[i - 1]].x);
+          (_rounds[_selected[i]].y - _rounds[_selected[i - 1]].y).abs();
       k = atan(k) * 180 / pi;
-      if (_rounds[_selected[i]].x >= _rounds[_selected[i - 1]].x) {
-        if (k < 0) k = 360 + k;
-      } else {
-        k = 180 + k;
-      }
-//      print(k);
-      Action item = new Action(0, 20, k.toInt(), 0, 0, 0);
-      print(item);
+      if (_rounds[_selected[i]].y > _rounds[_selected[i - 1]].y) {
+        if (_rounds[_selected[i]].x > _rounds[_selected[i - 1]].x)
+          k = k + 90;
+        else if (_rounds[_selected[i]].x < _rounds[_selected[i - 1]].x)
+          k = 360 - 90 - k;
+        else
+          k = 180;
+      } else if (_rounds[_selected[i]].y < _rounds[_selected[i - 1]].y) {
+        if (_rounds[_selected[i]].x < _rounds[_selected[i - 1]].x) k = 360 - k;
+      } else if (_rounds[_selected[i]].x < _rounds[_selected[i - 1]].x) k = 270;
+      print(k);
+
+      length = base *
+          sqrt(pow(_rounds[_selected[i]].y - _rounds[_selected[i - 1]].y, 2) +
+                  pow(_rounds[_selected[i]].x - _rounds[_selected[i - 1]].x, 2))
+              .toInt();
+
+      Action item = new Action(0, 30, k.toInt(), 0, 0, 0, length);
+      _actions.add(item);
     }
+    _actions.add(new Action(0, 0, 0, 0, 0, 0, 0));
+  }
+
+  int sendpath() {
+    int delaytimeforsend = 0;
+    for (Action item in _actions) {
+      Timer.periodic(Duration(milliseconds: delaytimeforsend), (timer) {
+        print(item);
+//        widget.controller.sendMsg(item.toString());
+        timer.cancel();
+        timer = null;
+      });
+      delaytimeforsend += item.len;
+    }
+    return delaytimeforsend;
   }
 
   void clear() {
@@ -179,6 +219,7 @@ class _LockPatternState extends State<LockPattern> {
       round.status = LockPatternStatus.Default;
     }
     _selected.clear();
+    _actions.clear();
     setState(() {});
   }
 
@@ -294,14 +335,8 @@ class LockPatternPainter extends CustomPainter {
   double _lineWidth;
   Color _defaultColor;
 
-  LockPatternPainter(
-      this._rounds,
-      this._selected,
-      this._lastTouchPoint,
-      this._radius,
-      this._solidRadius,
-      this._lineWidth,
-      this._defaultColor);
+  LockPatternPainter(this._rounds, this._selected, this._lastTouchPoint,
+      this._radius, this._solidRadius, this._lineWidth, this._defaultColor);
 
   @override
   void paint(Canvas canvas, Size size) {
